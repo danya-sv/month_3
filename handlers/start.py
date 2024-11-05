@@ -30,4 +30,5 @@ async def start_handler(message: types.Message):
                          f"Что умеет бот:\n"
                          f"/start - Начать работу\n"
                          f"/myinfo - Информация о позьзователе\n"
+                         f"/recept - Рандомный рецепт\n"
                          f"/random - Случайное имя из списка", reply_markup=kb)
