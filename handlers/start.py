@@ -1,4 +1,4 @@
-from aiogram import types, Router
+from aiogram import types, Router, F
 from aiogram.filters import Command
 from bot_config import user_ids
 
@@ -21,9 +21,16 @@ async def start_handler(message: types.Message):
                 types.InlineKeyboardButton(
                     text="Наш сайт", url="https://geeks.kg/"
                 )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text="Оставить отзыв",
+                    callback_data="review"
+                )
             ]
         ]
     )
+
 
     await message.answer(f"Привет, {name}!\n"
                          f"Наш бот обслуживает уже {user_count} пользователей.\n"
@@ -32,3 +39,4 @@ async def start_handler(message: types.Message):
                          f"/myinfo - Информация о позьзователе\n"
                          f"/recept - Рандомный рецепт\n"
                          f"/random - Случайное имя из списка", reply_markup=kb)
+
