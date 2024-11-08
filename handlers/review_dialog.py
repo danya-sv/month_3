@@ -23,12 +23,12 @@ def cleanliness_keyboard():
             [types.InlineKeyboardButton(text="Грязно", callback_data="Грязно")],
         ]
     )
-
+""" Функцию создал, чтобы в коде не дублировать клавиатуру """
 
 @review_router.callback_query(F.data == "review")
 async def start_review(callback: CallbackQuery, state: FSMContext):
-    await callback.answer()  # Убирает "мигание" кнопки
-    await state.set_state(RestaurantReview.name)  # Устанавливаем первое состояние
+    await callback.answer()  # чтобы кнопка не мигала
+    await state.set_state(RestaurantReview.name)
     await callback.message.answer("Напишите ваше имя")
 
 
@@ -154,3 +154,25 @@ async def process_extra_comments(message: types.Message, state: FSMContext):
 
     await message.answer(review_text)
     await state.clear()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
