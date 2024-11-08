@@ -5,6 +5,8 @@ from aiogram.types import CallbackQuery
 
 review_router = Router()
 
+reviewed_users = set()
+
 
 class RestaurantReview(StatesGroup):
     name = State()
@@ -23,13 +25,23 @@ def cleanliness_keyboard():
             [types.InlineKeyboardButton(text="Грязно", callback_data="Грязно")],
         ]
     )
+
+
 """ Функцию создал, чтобы в коде не дублировать клавиатуру """
+
 
 @review_router.callback_query(F.data == "review")
 async def start_review(callback: CallbackQuery, state: FSMContext):
-    await callback.answer()  # чтобы кнопка не мигала
-    await state.set_state(RestaurantReview.name)
-    await callback.message.answer("Напишите ваше имя")
+    id_user = callback.from_user.id
+    if id_user in reviewed_users:
+        await callback.message.answer("Вы уже оставляли отзыв!")
+        await callback.answer()
+        await state.clear()
+    else:
+        reviewed_users.add(id_user)
+        await callback.answer()  # чтобы кнопка не мигала
+        await state.set_state(RestaurantReview.name)
+        await callback.message.answer("Напишите ваше имя")
 
 
 @review_router.message(RestaurantReview.name)
@@ -154,25 +166,3 @@ async def process_extra_comments(message: types.Message, state: FSMContext):
 
     await message.answer(review_text)
     await state.clear()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
