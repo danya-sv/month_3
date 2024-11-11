@@ -6,6 +6,7 @@ bot = Bot(token=token)
 dp = Dispatcher()
 names = ["Иван", "Мария", "Алексей", "Ольга", "Дмитрий"]
 user_ids = set()
+reviewed_users = set()
 recipes = [
     {
         "name": "Паста Карбонара",

@@ -2,10 +2,8 @@ from aiogram import Router, F, types
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
-
+from bot_config import reviewed_users
 review_router = Router()
-
-reviewed_users = set()
 
 
 class RestaurantReview(StatesGroup):
