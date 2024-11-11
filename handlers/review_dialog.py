@@ -109,12 +109,12 @@ async def process_extra_comments(message: types.Message, state: FSMContext):
 
     review_text = (
         f"Спасибо, что уделили нам время!\n"
-        f"Имя: {user_data['name']}\n"
-        f"Телефон: {user_data['phone_number']}\n"
-        f"Дата визита: {user_data['visit_date']}\n"
-        f"Оценка еды: {user_data['food_rating']}\n"
-        f"Оценка чистоты: {user_data['cleanliness_rating']}\n"
-        f"Комментарий: {user_data['extra_comments']}"
+        f"Имя:  {user_data['name']}\n"
+        f"Телефон:  {user_data['phone_number']}\n"
+        f"Дата визита:  {user_data['visit_date']}\n"
+        f"Оценка еды:  {user_data['food_rating']}\n"
+        f"Оценка чистоты:  {user_data['cleanliness_rating']}\n"
+        f"Комментарий:  {user_data['extra_comments']}"
     )
 
     await message.answer(review_text)
