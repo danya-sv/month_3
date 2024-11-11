@@ -31,7 +31,6 @@ async def start_handler(message: types.Message):
         ]
     )
 
-
     await message.answer(f"Привет, {name}!\n"
                          f"Наш бот обслуживает уже {user_count} пользователей.\n"
                          f"Что умеет бот:\n"
@@ -39,4 +38,3 @@ async def start_handler(message: types.Message):
                          f"/myinfo - Информация о позьзователе\n"
                          f"/recept - Рандомный рецепт\n"
                          f"/random - Случайное имя из списка", reply_markup=kb)
-
