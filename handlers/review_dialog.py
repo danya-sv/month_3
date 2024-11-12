@@ -19,8 +19,16 @@ class RestaurantReview(StatesGroup):
 def cleanliness_keyboard():
     return types.InlineKeyboardMarkup(
         inline_keyboard=[
-            [types.InlineKeyboardButton(text="Очень чисто", callback_data="Очень чисто")],
-            [types.InlineKeyboardButton(text="Средне чисто", callback_data="Средне чисто")],
+            [
+                types.InlineKeyboardButton(
+                    text="Очень чисто", callback_data="Очень чисто"
+                )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text="Средне чисто", callback_data="Средне чисто"
+                )
+            ],
             [types.InlineKeyboardButton(text="Грязно", callback_data="Грязно")],
         ]
     )
@@ -54,47 +62,45 @@ async def process_name(message: types.Message, state: FSMContext):
 async def process_phone_number(message: types.Message, state: FSMContext):
     await state.update_data(phone_number=message.text)
     await state.set_state(RestaurantReview.visit_date)
-    await message.answer("Введите дату, когда вы были у нас в ресторане\nПример ввода: 20.05.2024")
+    await message.answer(
+        "Введите дату, когда вы были у нас в ресторане\nПример ввода: 20.05.2024"
+    )
 
 
 @review_router.message(RestaurantReview.visit_date)
 async def process_visit_date(message: types.Message, state: FSMContext):
     await state.update_data(visit_date=message.text)
     await state.set_state(RestaurantReview.food_rating)
-    food_kb = types.InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                types.InlineKeyboardButton(
-                    text="Отлично",
-                    callback_data="Отлично"
-                )
-            ],
-            [
-                types.InlineKeyboardButton(
-                    text="Удовлетворительно",
-                    callback_data="Удовлетворительно"
-                )
-            ],
-            [
-                types.InlineKeyboardButton(
-                    text="Плохо",
-                    callback_data="Плохо"
-                )
-            ]
-        ]
+    food_kb = types.ReplyKeyboardMarkup(
+        keyboard=[
+            [types.KeyboardButton(text="5")],
+            [types.KeyboardButton(text="4")],
+            [types.KeyboardButton(text="3")],
+            [types.KeyboardButton(text="2")],
+            [types.KeyboardButton(text="1")],
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True,
     )
     await message.answer("Оцените качество еды", reply_markup=food_kb)
 
 
-@review_router.callback_query(RestaurantReview.food_rating, F.data.in_(["Отлично", "Удовлетворительно", "Плохо"]))
-async def process_food_rating(callback: CallbackQuery, state: FSMContext):
-    await state.update_data(food_rating=callback.data)
-    await state.set_state(RestaurantReview.cleanliness_rating)
-    await callback.message.answer("Оцените чистоту нашего заведения", reply_markup=cleanliness_keyboard())
-    await callback.answer()
+@review_router.message(RestaurantReview.food_rating)
+async def process_food_rating(message: types.Message, state: FSMContext):
+    if message.text not in ["1", "2", "3", "4", "5"]:
+        await message.answer("Пожалуйста, введите оценку от 1 до 5.")
+    else:
+        await state.update_data(food_rating=message.text)
+        await state.set_state(RestaurantReview.cleanliness_rating)
+        await message.answer(
+            "Оцените чистоту нашего заведения", reply_markup=cleanliness_keyboard()
+        )
 
 
-@review_router.callback_query(RestaurantReview.cleanliness_rating, F.data.in_(["Очень чисто", "Средне чисто", "Грязно"]))
+@review_router.callback_query(
+    RestaurantReview.cleanliness_rating,
+    F.data.in_(["Очень чисто", "Средне чисто", "Грязно"]),
+)
 async def process_cleanliness_rating(callback: CallbackQuery, state: FSMContext):
     await state.update_data(cleanliness_rating=callback.data)
     await state.set_state(RestaurantReview.extra_comments)
@@ -109,7 +115,7 @@ async def process_extra_comments(message: types.Message, state: FSMContext):
 
     review_text = (
         f"Спасибо, что уделили нам время!\n"
-        f"Имя:  {user_data['name']}\n"
+        f"Имя: {user_data['name']}\n"
         f"Телефон:  {user_data['phone_number']}\n"
         f"Дата визита:  {user_data['visit_date']}\n"
         f"Оценка еды:  {user_data['food_rating']}\n"
