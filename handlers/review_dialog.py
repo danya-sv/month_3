@@ -55,16 +55,23 @@ async def start_review(callback: CallbackQuery, state: FSMContext):
 async def process_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(RestaurantReview.phone_number)
-    await message.answer("Напишите ваш номер телефона")
+    await message.answer(
+        "Напишите ваш номер телефона\nИспользуйте формат +996, +7 и т.д."
+    )
 
 
 @review_router.message(RestaurantReview.phone_number)
 async def process_phone_number(message: types.Message, state: FSMContext):
-    await state.update_data(phone_number=message.text)
-    await state.set_state(RestaurantReview.visit_date)
-    await message.answer(
-        "Введите дату, когда вы были у нас в ресторане\nПример ввода: 20.05.2024"
-    )
+    code_num = ["+996", "+7", "+33", "+49", "+39", "+44", "+1"]
+    for code in code_num:
+        if message.text.startswith(code):
+            await state.update_data(phone_number=message.text)
+            await state.set_state(RestaurantReview.visit_date)
+            await message.answer(
+                "Введите дату, когда вы были у нас в ресторане\nПример ввода: 20.05.2024"
+            )
+            return
+    await message.answer("Неправильный формат! Попробуйте еще раз")
 
 
 @review_router.message(RestaurantReview.visit_date)
