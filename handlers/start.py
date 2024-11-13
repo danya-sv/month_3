@@ -1,5 +1,6 @@
-from aiogram import types, Router, F
+from aiogram import F, Router, types
 from aiogram.filters import Command
+
 from bot_config import user_ids
 
 start_router = Router()
@@ -18,23 +19,20 @@ async def start_handler(message: types.Message):
                 types.InlineKeyboardButton(
                     text="Наш inst", url="https://www.instagram.com/geeks_edu/"
                 ),
-                types.InlineKeyboardButton(
-                    text="Наш сайт", url="https://geeks.kg/"
-                )
+                types.InlineKeyboardButton(text="Наш сайт", url="https://geeks.kg/"),
             ],
-            [
-                types.InlineKeyboardButton(
-                    text="Оставить отзыв",
-                    callback_data="review"
-                )
-            ]
+            [types.InlineKeyboardButton(text="Оставить отзыв", callback_data="review")],
+            [types.InlineKeyboardButton(text="Регистрация", callback_data="reg")],
         ]
     )
 
-    await message.answer(f"Привет, {name}!\n"
-                         f"Наш бот обслуживает уже {user_count} пользователей.\n"
-                         f"Что умеет бот:\n"
-                         f"/start - Начать работу\n"
-                         f"/myinfo - Информация о позьзователе\n"
-                         f"/recept - Рандомный рецепт\n"
-                         f"/random - Случайное имя из списка", reply_markup=kb)
+    await message.answer(
+        f"Привет, {name}!\n"
+        f"Наш бот обслуживает уже {user_count} пользователей.\n"
+        f"Что умеет бот:\n"
+        f"/start - Начать работу\n"
+        f"/myinfo - Информация о позьзователе\n"
+        f"/recept - Рандомный рецепт\n"
+        f"/random - Случайное имя из списка",
+        reply_markup=kb,
+    )

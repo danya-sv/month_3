@@ -1,8 +1,9 @@
-from aiogram import Router, F, types
-from aiogram.fsm.state import State, StatesGroup
+from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
-from bot_config import reviewed_users
+
+from bot_config import reg_account, reg_users, registered_users, reviewed_users
 
 review_router = Router()
 
@@ -41,6 +42,14 @@ def cleanliness_keyboard():
 @review_router.callback_query(F.data == "review")
 async def start_review(callback: CallbackQuery, state: FSMContext):
     id_user = callback.from_user.id
+    if id_user not in reg_account:
+        await callback.message.answer(
+            "Чтобы оставить отзыв, пожалуйста, зарегистрируйтесь!"
+        )
+        await callback.answer()
+        await state.clear()
+        return
+
     if id_user in reviewed_users:
         await callback.message.answer("Вы уже оставляли отзыв!")
         await callback.answer()
@@ -49,15 +58,29 @@ async def start_review(callback: CallbackQuery, state: FSMContext):
         reviewed_users.add(id_user)
         await callback.answer()  # чтобы кнопка не мигала
         await state.set_state(RestaurantReview.name)
-        await callback.message.answer("Напишите ваше имя")
+
+    name_kb = types.ReplyKeyboardMarkup(
+        keyboard=[[types.KeyboardButton(text=registered_users[id_user])]],
+        resize_keyboard=True,
+        one_time_keyboard=True,
+    )
+
+    await callback.message.answer("Напишите ваше имя", reply_markup=name_kb)
 
 
 @review_router.message(RestaurantReview.name)
 async def process_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(RestaurantReview.phone_number)
+    id_u = message.from_user.id
+    phone_kb = types.ReplyKeyboardMarkup(
+        keyboard=[[types.KeyboardButton(text=reg_users[id_u])]],
+        resize_keyboard=True,
+        one_time_keyboard=True,
+    )
     await message.answer(
-        "Напишите ваш номер телефона\nИспользуйте формат +996, +7 и т.д."
+        "Напишите ваш номер телефона\nИспользуйте формат +996, +7 и т.д.",
+        reply_markup=phone_kb,
     )
 
 
@@ -137,18 +160,7 @@ async def process_extra_comments(message: types.Message, state: FSMContext):
 @review_router.message(RestaurantReview.total_rating)
 async def process_total_rating(message: types.Message, state: FSMContext):
     await state.update_data(total_rating=message.text)
-    user_data = await state.get_data()
-
-    review_text = (
-        f"Спасибо, что уделили нам время!\n"
-        f"Имя: {user_data['name']}\n"
-        f"Телефон:  {user_data['phone_number']}\n"
-        f"Дата визита:  {user_data['visit_date']}\n"
-        f"Оценка еды:  {user_data['food_rating']}\n"
-        f"Оценка чистоты:  {user_data['cleanliness_rating']}\n"
-        f"Комментарий:  {user_data['extra_comments']}\n"
-        f"Общая оценка:  {user_data['total_rating']}"
+    await message.answer(
+        "Ваши отзыв был принят. Спасибо!", reply_markup=types.ReplyKeyboardRemove()
     )
-
-    await message.answer(review_text)
     await state.clear()

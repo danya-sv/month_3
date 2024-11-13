@@ -39,3 +39,6 @@ recipes = [
         "image_path": "resipes/cheesecake.jpg",
     },
 ]
+reg_account = set()
+registered_users = {}
+reg_users = {}
