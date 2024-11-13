@@ -18,6 +18,20 @@ class RestaurantReview(StatesGroup):
     total_rating = State()
 
 
+def main_kb():
+    return types.ReplyKeyboardMarkup(
+        keyboard=[
+            [types.KeyboardButton(text="5")],
+            [types.KeyboardButton(text="4")],
+            [types.KeyboardButton(text="3")],
+            [types.KeyboardButton(text="2")],
+            [types.KeyboardButton(text="1")],
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True,
+    )
+
+
 def cleanliness_keyboard():
     return types.InlineKeyboardMarkup(
         inline_keyboard=[
@@ -102,18 +116,8 @@ async def process_phone_number(message: types.Message, state: FSMContext):
 async def process_visit_date(message: types.Message, state: FSMContext):
     await state.update_data(visit_date=message.text)
     await state.set_state(RestaurantReview.food_rating)
-    food_kb = types.ReplyKeyboardMarkup(
-        keyboard=[
-            [types.KeyboardButton(text="5")],
-            [types.KeyboardButton(text="4")],
-            [types.KeyboardButton(text="3")],
-            [types.KeyboardButton(text="2")],
-            [types.KeyboardButton(text="1")],
-        ],
-        resize_keyboard=True,
-        one_time_keyboard=True,
-    )
-    await message.answer("Оцените качество еды", reply_markup=food_kb)
+
+    await message.answer("Оцените качество еды", reply_markup=main_kb())
 
 
 @review_router.message(RestaurantReview.food_rating)
@@ -143,18 +147,7 @@ async def process_cleanliness_rating(callback: CallbackQuery, state: FSMContext)
 async def process_extra_comments(message: types.Message, state: FSMContext):
     await state.update_data(extra_comments=message.text)
     await state.set_state(RestaurantReview.total_rating)
-    rating_kb = types.ReplyKeyboardMarkup(
-        keyboard=[
-            [types.KeyboardButton(text="5")],
-            [types.KeyboardButton(text="4")],
-            [types.KeyboardButton(text="3")],
-            [types.KeyboardButton(text="2")],
-            [types.KeyboardButton(text="1")],
-        ],
-        resize_keyboard=True,
-        one_time_keyboard=True,
-    )
-    await message.answer("Дайте общую оценку нашему ресторану", reply_markup=rating_kb)
+    await message.answer("Дайте общую оценку нашему ресторану", reply_markup=main_kb())
 
 
 @review_router.message(RestaurantReview.total_rating)
