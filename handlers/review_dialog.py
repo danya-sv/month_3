@@ -14,6 +14,7 @@ class RestaurantReview(StatesGroup):
     food_rating = State()
     cleanliness_rating = State()
     extra_comments = State()
+    total_rating = State()
 
 
 def cleanliness_keyboard():
@@ -118,6 +119,24 @@ async def process_cleanliness_rating(callback: CallbackQuery, state: FSMContext)
 @review_router.message(RestaurantReview.extra_comments)
 async def process_extra_comments(message: types.Message, state: FSMContext):
     await state.update_data(extra_comments=message.text)
+    await state.set_state(RestaurantReview.total_rating)
+    rating_kb = types.ReplyKeyboardMarkup(
+        keyboard=[
+            [types.KeyboardButton(text="5")],
+            [types.KeyboardButton(text="4")],
+            [types.KeyboardButton(text="3")],
+            [types.KeyboardButton(text="2")],
+            [types.KeyboardButton(text="1")],
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True,
+    )
+    await message.answer("Дайте общую оценку нашему ресторану", reply_markup=rating_kb)
+
+
+@review_router.message(RestaurantReview.total_rating)
+async def process_total_rating(message: types.Message, state: FSMContext):
+    await state.update_data(total_rating=message.text)
     user_data = await state.get_data()
 
     review_text = (
@@ -127,7 +146,8 @@ async def process_extra_comments(message: types.Message, state: FSMContext):
         f"Дата визита:  {user_data['visit_date']}\n"
         f"Оценка еды:  {user_data['food_rating']}\n"
         f"Оценка чистоты:  {user_data['cleanliness_rating']}\n"
-        f"Комментарий:  {user_data['extra_comments']}"
+        f"Комментарий:  {user_data['extra_comments']}\n"
+        f"Общая оценка:  {user_data['total_rating']}"
     )
 
     await message.answer(review_text)
