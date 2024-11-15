@@ -1,7 +1,10 @@
 from aiogram import F, Router, types
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
+
+from bot_config import database
 
 from bot_config import reg_account, reg_users, registered_users, reviewed_users
 
@@ -16,6 +19,13 @@ class RestaurantReview(StatesGroup):
     cleanliness_rating = State()
     extra_comments = State()
     total_rating = State()
+    
+    
+@review_router.message(Command("stop"))
+@review_router.message(F.text == "стоп")
+async def stop_opros(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Опрос остановлен")
 
 
 def main_kb():
@@ -86,9 +96,9 @@ async def start_review(callback: CallbackQuery, state: FSMContext):
 async def process_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(RestaurantReview.phone_number)
-    id_u = message.from_user.id
+    id_user = message.from_user.id
     phone_kb = types.ReplyKeyboardMarkup(
-        keyboard=[[types.KeyboardButton(text=reg_users[id_u])]],
+        keyboard=[[types.KeyboardButton(text=reg_users[id_user])]],
         resize_keyboard=True,
         one_time_keyboard=True,
     )
@@ -154,6 +164,17 @@ async def process_extra_comments(message: types.Message, state: FSMContext):
 async def process_total_rating(message: types.Message, state: FSMContext):
     await state.update_data(total_rating=message.text)
     await message.answer(
-        "Ваши отзыв был принят. Спасибо!", reply_markup=types.ReplyKeyboardRemove()
+        "Ваши отзыв был принят. Спасибо!", reply_markup=types.ReplyKeyboardRemove())
+    data = await state.get_data()
+    print(data)
+    database.execute(
+        query="""
+          INSERT INTO reviews (name, phone_number, visit_date, food_rating, cleanliness_rating, extra_comments, total_rating)
+          VALUES (?,?,?,?,?,?,?)      
+        """,
+        params=(data["name"], data["phone_number"], data["visit_date"],
+         data["food_rating"], data["cleanliness_rating"], data["extra_comments"], data["total_rating"])
     )
+    
+    
     await state.clear()
