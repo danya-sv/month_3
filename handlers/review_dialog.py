@@ -4,9 +4,13 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
-from bot_config import database
-
-from bot_config import reg_account, reg_users, registered_users, reviewed_users
+from bot_config import (
+    database,
+    reg_account,
+    reg_users,
+    registered_users,
+    reviewed_users,
+)
 
 review_router = Router()
 
@@ -19,8 +23,9 @@ class RestaurantReview(StatesGroup):
     cleanliness_rating = State()
     extra_comments = State()
     total_rating = State()
-    
-    
+    confirm = State()
+
+
 @review_router.message(Command("stop"))
 @review_router.message(F.text == "стоп")
 async def stop_opros(message: types.Message, state: FSMContext):
@@ -57,6 +62,17 @@ def cleanliness_keyboard():
             ],
             [types.InlineKeyboardButton(text="Грязно", callback_data="Грязно")],
         ]
+    )
+
+
+def review_kb():
+    return types.ReplyKeyboardMarkup(
+        keyboard=[
+            [types.KeyboardButton(text="Подтвердить")],
+            [types.KeyboardButton(text="Отклонить")],
+        ],
+        resize_keyboard=True,
+        one_time_keyboard=True,
     )
 
 
@@ -163,18 +179,55 @@ async def process_extra_comments(message: types.Message, state: FSMContext):
 @review_router.message(RestaurantReview.total_rating)
 async def process_total_rating(message: types.Message, state: FSMContext):
     await state.update_data(total_rating=message.text)
-    await message.answer(
-        "Ваши отзыв был принят. Спасибо!", reply_markup=types.ReplyKeyboardRemove())
+    await state.set_state(RestaurantReview.confirm)
     data = await state.get_data()
-    print(data)
-    database.execute(
-        query="""
-          INSERT INTO reviews (name, phone_number, visit_date, food_rating, cleanliness_rating, extra_comments, total_rating)
-          VALUES (?,?,?,?,?,?,?)      
-        """,
-        params=(data["name"], data["phone_number"], data["visit_date"],
-         data["food_rating"], data["cleanliness_rating"], data["extra_comments"], data["total_rating"])
+    review_text = (
+        f"Вот ваш отзыв:\n"
+        f"Имя: {data['name']}\n"
+        f"Телефон: {data['phone_number']}\n"
+        f"Дата визита: {data['visit_date']}\n"
+        f"Оценка еды: {data['food_rating']}\n"
+        f"Оценка чистоты: {data['cleanliness_rating']}\n"
+        f"Комментарий: {data['extra_comments']}\n"
+        f"Общая оценка: {data['total_rating']}\n\n"
+        f"Вы подтверждаете отправку отзыва?"
     )
-    
-    
-    await state.clear()
+    await message.answer(review_text, reply_markup=review_kb())
+
+
+@review_router.message(RestaurantReview.confirm)
+async def process_confirmation(message: types.Message, state: FSMContext):
+    id_user = message.from_user.id
+    if message.text.lower() == "подтвердить":
+        data = await state.get_data()
+        database.execute(
+            query="""
+              INSERT INTO reviews (name, phone_number, visit_date, food_rating, cleanliness_rating, extra_comments, total_rating)
+              VALUES (?,?,?,?,?,?,?)      
+            """,
+            params=(
+                data["name"],
+                data["phone_number"],
+                data["visit_date"],
+                data["food_rating"],
+                data["cleanliness_rating"],
+                data["extra_comments"],
+                data["total_rating"],
+            ),
+        )
+        await message.answer(
+            "Ваш отзыв был принят. Спасибо!", reply_markup=types.ReplyKeyboardRemove()
+        )
+        await state.clear()
+
+    elif message.text.lower() == "отклонить":
+        if id_user in reviewed_users:
+            reviewed_users.remove(id_user)
+
+        await message.answer(
+            "Отзыв отменен",
+            reply_markup=types.ReplyKeyboardRemove(),
+        )
+        await state.clear()
+    else:
+        await message.answer("Пожалуйста, выберите 'Подтвердить' или 'Отклонить'.")
