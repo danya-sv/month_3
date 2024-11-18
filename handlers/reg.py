@@ -3,8 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery
 
-
-from bot_config import reg_account, reg_users, registered_users, database
+from bot_config import database, reg_account, reg_users, registered_users
 
 reg_router = Router()
 
@@ -78,6 +77,6 @@ async def process_city(message: types.Message, state: FSMContext):
           INSERT INTO reg_users (name, age, phone_number, city)
           VALUES (?,?,?,?)      
         """,
-        params=(dta["name"], dta["age"], dta["phone_number"], dta["city"])
+        params=(dta["name"], dta["age"], dta["phone_number"], dta["city"]),
     )
     await state.clear()

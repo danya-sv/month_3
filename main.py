@@ -1,12 +1,13 @@
 import asyncio
 import logging
-from handlers.random import random_router
-from handlers.start import start_router
+
+from bot_config import bot, database, dp
 from handlers.myinfo import myinfo_router
+from handlers.random import random_router
 from handlers.random_recipe import recipe_router
-from handlers.review_dialog import review_router
 from handlers.reg import reg_router
-from bot_config import dp, bot, database
+from handlers.review_dialog import review_router
+from handlers.start import start_router
 
 
 async def on_startup(bot):
