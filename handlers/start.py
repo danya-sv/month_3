@@ -1,4 +1,4 @@
-from aiogram import F, Router, types
+from aiogram import Router, types
 from aiogram.filters import Command
 
 from bot_config import user_ids
@@ -15,12 +15,7 @@ async def start_handler(message: types.Message):
 
     kb = types.InlineKeyboardMarkup(
         inline_keyboard=[
-            [
-                types.InlineKeyboardButton(
-                    text="Наш inst", url="https://www.instagram.com/geeks_edu/"
-                ),
-                types.InlineKeyboardButton(text="Наш сайт", url="https://geeks.kg/"),
-            ],
+            [types.InlineKeyboardButton(text="Наш inst", url="https://www.instagram.com/geeks_edu/"),types.InlineKeyboardButton(text="Наш сайт", url="https://geeks.kg/")],
             [types.InlineKeyboardButton(text="Оставить отзыв", callback_data="review")],
             [types.InlineKeyboardButton(text="Регистрация", callback_data="reg")],
             [types.InlineKeyboardButton(text="Меню", callback_data="menu")],
@@ -42,3 +37,7 @@ async def start_handler(message: types.Message):
         f"/random - Случайное имя из списка",
         reply_markup=kb,
     )
+
+
+
+
