@@ -8,13 +8,16 @@ menu_router = Router()
 
 @menu_router.callback_query(F.data == "menu")
 async def view_all_dishes(callback: CallbackQuery):
-    all_dish = database.fetch(query="SELECT name, price, category FROM dishes ORDER BY price ASC")
+    await callback.answer()
+    all_dish = database.fetch(
+        query="SELECT name, price, category FROM dishes ORDER BY price ASC"
+    )
 
-    response = "Список блюд: \n\n"
+    response = "🍽️ Наше меню:\n\n"
     for dish in all_dish:
         response += (
-            f"🍴 Название: {dish['name']}\n"
-            f"💰 Цена: {dish['price']}\n"
-            f"📂 Категория: {dish['category']}\n\n"
+            f"📝 Название: {dish['name']}\n"
+            f"💵 Цена: {dish['price']} сом\n"
+            f"📋 Категория: {dish['category']}\n\n"
         )
     await callback.message.answer(response)

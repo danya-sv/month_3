@@ -84,14 +84,16 @@ async def start_review(callback: CallbackQuery, state: FSMContext):
     id_user = callback.from_user.id
     if id_user not in reg_account:
         await callback.message.answer(
-            "Чтобы оставить отзыв, пожалуйста, зарегистрируйтесь!"
+            "🔔 Чтобы оставить отзыв, вам необходимо зарегистрироваться в системе."
         )
         await callback.answer()
         await state.clear()
         return
 
     if id_user in reviewed_users:
-        await callback.message.answer("Вы уже оставляли отзыв!")
+        await callback.message.answer(
+            "🚫 Вы уже оставляли отзыв. Благодарим за участие!"
+        )
         await callback.answer()
         await state.clear()
     else:
@@ -105,7 +107,9 @@ async def start_review(callback: CallbackQuery, state: FSMContext):
         one_time_keyboard=True,
     )
 
-    await callback.message.answer("Напишите ваше имя", reply_markup=name_kb)
+    await callback.message.answer(
+        "👤 Пожалуйста, укажите ваше имя", reply_markup=name_kb
+    )
 
 
 @review_router.message(RestaurantReview.name)
@@ -119,7 +123,7 @@ async def process_name(message: types.Message, state: FSMContext):
         one_time_keyboard=True,
     )
     await message.answer(
-        "Напишите ваш номер телефона\nИспользуйте формат +996, +7 и т.д.",
+        "📞 Введите ваш номер телефона (например, +996, +7 и т.д.)",
         reply_markup=phone_kb,
     )
 
@@ -132,10 +136,10 @@ async def process_phone_number(message: types.Message, state: FSMContext):
             await state.update_data(phone_number=message.text)
             await state.set_state(RestaurantReview.visit_date)
             await message.answer(
-                "Введите дату, когда вы были у нас в ресторане\nПример ввода: 20.05.2024"
+                "📅 Укажите дату вашего визита в ресторан (например, 20.05.2024)"
             )
             return
-    await message.answer("Неправильный формат! Попробуйте еще раз")
+    await message.answer("❌ Неправильный формат номера! Попробуйте еще раз.")
 
 
 @review_router.message(RestaurantReview.visit_date)
@@ -143,18 +147,18 @@ async def process_visit_date(message: types.Message, state: FSMContext):
     await state.update_data(visit_date=message.text)
     await state.set_state(RestaurantReview.food_rating)
 
-    await message.answer("Оцените качество еды", reply_markup=main_kb())
+    await message.answer("🍽️ Оцените качество еды (от 1 до 5)", reply_markup=main_kb())
 
 
 @review_router.message(RestaurantReview.food_rating)
 async def process_food_rating(message: types.Message, state: FSMContext):
     if message.text not in ["1", "2", "3", "4", "5"]:
-        await message.answer("Пожалуйста, введите оценку от 1 до 5.")
+        await message.answer("⚠️ Пожалуйста, введите оценку от 1 до 5.")
     else:
         await state.update_data(food_rating=message.text)
         await state.set_state(RestaurantReview.cleanliness_rating)
         await message.answer(
-            "Оцените чистоту нашего заведения", reply_markup=cleanliness_keyboard()
+            "🧹 Оцените чистоту в нашем ресторане", reply_markup=cleanliness_keyboard()
         )
 
 
@@ -165,7 +169,7 @@ async def process_food_rating(message: types.Message, state: FSMContext):
 async def process_cleanliness_rating(callback: CallbackQuery, state: FSMContext):
     await state.update_data(cleanliness_rating=callback.data)
     await state.set_state(RestaurantReview.extra_comments)
-    await callback.message.answer("Напишите комментарий нашему ресторану")
+    await callback.message.answer("📝 Оставьте дополнительные комментарии о ресторане")
     await callback.answer()
 
 
@@ -173,7 +177,9 @@ async def process_cleanliness_rating(callback: CallbackQuery, state: FSMContext)
 async def process_extra_comments(message: types.Message, state: FSMContext):
     await state.update_data(extra_comments=message.text)
     await state.set_state(RestaurantReview.total_rating)
-    await message.answer("Дайте общую оценку нашему ресторану", reply_markup=main_kb())
+    await message.answer(
+        "⭐ Дайте общую оценку нашему ресторану", reply_markup=main_kb()
+    )
 
 
 @review_router.message(RestaurantReview.total_rating)
@@ -182,14 +188,14 @@ async def process_total_rating(message: types.Message, state: FSMContext):
     await state.set_state(RestaurantReview.confirm)
     data = await state.get_data()
     review_text = (
-        f"Вот ваш отзыв:\n"
-        f"Имя: {data['name']}\n"
-        f"Телефон: {data['phone_number']}\n"
-        f"Дата визита: {data['visit_date']}\n"
-        f"Оценка еды: {data['food_rating']}\n"
-        f"Оценка чистоты: {data['cleanliness_rating']}\n"
-        f"Комментарий: {data['extra_comments']}\n"
-        f"Общая оценка: {data['total_rating']}\n\n"
+        f"📋 Ваш отзыв:\n"
+        f"🔹 Имя: {data['name']}\n"
+        f"🔹 Телефон: {data['phone_number']}\n"
+        f"🔹 Дата визита: {data['visit_date']}\n"
+        f"🔹 Оценка еды: {data['food_rating']}\n"
+        f"🔹 Оценка чистоты: {data['cleanliness_rating']}\n"
+        f"🔹 Комментарий: {data['extra_comments']}\n"
+        f"🔹 Общая оценка: {data['total_rating']}\n\n"
         f"Вы подтверждаете отправку отзыва?"
     )
     await message.answer(review_text, reply_markup=review_kb())
@@ -216,7 +222,8 @@ async def process_confirmation(message: types.Message, state: FSMContext):
             ),
         )
         await message.answer(
-            "Ваш отзыв был принят. Спасибо!", reply_markup=types.ReplyKeyboardRemove()
+            "✅ Ваш отзыв успешно отправлен. Благодарим за ваше время!",
+            reply_markup=types.ReplyKeyboardRemove(),
         )
         await state.clear()
 
@@ -225,9 +232,9 @@ async def process_confirmation(message: types.Message, state: FSMContext):
             reviewed_users.remove(id_user)
 
         await message.answer(
-            "Отзыв отменен",
+            "❌ Ваш отзыв был отклонен.",
             reply_markup=types.ReplyKeyboardRemove(),
         )
         await state.clear()
     else:
-        await message.answer("Пожалуйста, выберите 'Подтвердить' или 'Отклонить'.")
+        await message.answer("⚠️ Пожалуйста, выберите 'Подтвердить' или 'Отклонить'.")

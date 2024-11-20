@@ -15,7 +15,12 @@ async def start_handler(message: types.Message):
 
     kb = types.InlineKeyboardMarkup(
         inline_keyboard=[
-            [types.InlineKeyboardButton(text="Наш inst", url="https://www.instagram.com/geeks_edu/"),types.InlineKeyboardButton(text="Наш сайт", url="https://geeks.kg/")],
+            [
+                types.InlineKeyboardButton(
+                    text="Наш inst", url="https://www.instagram.com/geeks_edu/"
+                ),
+                types.InlineKeyboardButton(text="Наш сайт", url="https://geeks.kg/"),
+            ],
             [types.InlineKeyboardButton(text="Оставить отзыв", callback_data="review")],
             [types.InlineKeyboardButton(text="Регистрация", callback_data="reg")],
             [types.InlineKeyboardButton(text="Меню", callback_data="menu")],
@@ -28,16 +33,13 @@ async def start_handler(message: types.Message):
     )
 
     await message.answer(
-        f"Привет, {name}!\n"
-        f"Наш бот обслуживает уже {user_count} пользователей.\n"
-        f"Что умеет бот:\n"
-        f"/start - Начать работу\n"
-        f"/myinfo - Информация о позьзователе\n"
-        f"/recept - Рандомный рецепт\n"
-        f"/random - Случайное имя из списка",
+        f"Привет, {name}! 👋\n\n"
+        f"Добро пожаловать в Telegram-бота для нашего TG Restoran. Уже {user_count} пользователей доверили нам свое время! 🚀\n\n"
+        f"Вот что может наш бот:\n"
+        f"🔹 /start — Перезапустить работу с ботом\n"
+        f"🔹 /myinfo — Узнать информацию о вашем профиле\n"
+        f"🔹 /recept — Подобрать случайный рецепт 🍽️\n"
+        f"🔹 /random — Получить случайное имя из списка 🎲\n\n"
+        f"Используйте меню ниже, чтобы изучить возможности! 👇",
         reply_markup=kb,
     )
-
-
-
-
