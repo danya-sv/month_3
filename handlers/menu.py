@@ -14,7 +14,7 @@ async def view_all_dishes(callback: CallbackQuery):
             FROM dishes
             JOIN dish_categories ON dishes.category_id = dish_categories.id
             ORDER BY dishes.price ASC
-        """
+            """
     )
 
     response = "🍽️ Наше меню:\n\n"

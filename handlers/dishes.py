@@ -101,7 +101,7 @@ async def process_category(message: types.Message, state: FSMContext):
         query="SELECT id FROM dish_categories WHERE name = ?", params=(message.text,)
     )
     if not category:
-        await message.answer("❌ Указанная категория не найдена. Попробуйте снова.")
+        await message.answer("❌ Указанная категория не найдена. Попробуйте снова")
         return
 
     category_id = category[0]["id"]
