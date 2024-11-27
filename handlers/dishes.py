@@ -11,7 +11,12 @@ from aiogram.types import (
 from bot_config import database
 
 dishes_router = Router()
-
+dishes_router.message.filter(
+    F.from_user.id == 1069749988
+    )
+dishes_router.callback_query.filter(
+    F.from_user.id == 1069749988
+    )
 
 class Dish(StatesGroup):
     name = State()
@@ -22,8 +27,6 @@ class Dish(StatesGroup):
 class Category(StatesGroup):
     name = State()
 
-
-ADMIN_ID = 1069749988
 
 
 @dishes_router.callback_query(F.data == "add_category")
@@ -48,18 +51,12 @@ async def process_category_name(message: types.Message, state: FSMContext):
 
 @dishes_router.callback_query(F.data == "add_dish")
 async def start_add_dishes(callback: CallbackQuery, state: FSMContext):
-    if callback.from_user.id != ADMIN_ID:
-        await callback.answer("❌ У вас нет прав для добавления блюд.", show_alert=True)
-        return
     await state.set_state(Dish.name)
     await callback.message.answer("📝 Пожалуйста, введите название нового блюда:")
 
 
 @dishes_router.message(Dish.name)
 async def process_name(message: types.Message, state: FSMContext):
-    if message.from_user.id != ADMIN_ID:
-        await message.answer("❌ У вас нет прав для выполнения этого действия.")
-        return
     await state.update_data(name=message.text)
     await state.set_state(Dish.price)
     await message.answer("💸 Теперь введите цену блюда:")
@@ -67,9 +64,6 @@ async def process_name(message: types.Message, state: FSMContext):
 
 @dishes_router.message(Dish.price)
 async def process_price(message: types.Message, state: FSMContext):
-    if message.from_user.id != ADMIN_ID:
-        await message.answer("❌ У вас нет прав для выполнения этого действия.")
-        return
     await state.update_data(price=message.text)
     await state.set_state(Dish.category)
 
@@ -93,9 +87,6 @@ async def process_price(message: types.Message, state: FSMContext):
 
 @dishes_router.message(Dish.category)
 async def process_category(message: types.Message, state: FSMContext):
-    if message.from_user.id != ADMIN_ID:
-        await message.answer("❌ У вас нет прав для выполнения этого действия.")
-        return
 
     category = database.fetch(
         query="SELECT id FROM dish_categories WHERE name = ?", params=(message.text,)

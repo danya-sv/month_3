@@ -8,6 +8,7 @@ start_router = Router()
 
 @start_router.message(Command("start"))
 async def start_handler(message: types.Message):
+    print(f"Message chat type: {message.chat.type}")
     user_id = message.from_user.id
     user_ids.add(user_id)
     user_count = len(user_ids)
@@ -38,5 +39,6 @@ async def start_handler(message: types.Message):
         f"🔹 /recept — Подобрать случайный рецепт 🍽️\n"
         f"🔹 /random — Получить случайное имя из списка 🎲\n\n"
         f"Используйте меню ниже, чтобы изучить возможности! 👇",
-        reply_markup=kb,
+        # f"<pre>Это текст в моноширинном шрифте       </pre>",
+        reply_markup=kb
     )
