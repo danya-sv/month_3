@@ -27,7 +27,7 @@ async def unban_user(message: types.Message):
         await message.bot.restrict_chat_member(
             chat_id=message.chat.id,
             user_id=id,
-            permissions=ChatPermissions(can_send_messages=True)  # Разрешаем отправку сообщений
+            permissions=ChatPermissions(can_send_messages=True)
         )
         await message.answer(f"Пользователь {message.reply_to_message.from_user.full_name} снова активен.")
         
